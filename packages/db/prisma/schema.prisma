@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  User
+  Admin
+}
+
+model User {
+  id          String        @id @default(uuid())
+  username    String
+  email       String        @unique
+  picture     String?
+  googleId    String        @unique
+  role        Role          @default(User)
+  leaderboard Leaderboard[]
+  submissions Submission[]
+}
+
+model Contest {
+  id                        String                      @id @default(uuid())
+  title                     String
+  startTime                 DateTime
+  contestToChallengeMapping ContestToChallengeMapping[]
+  leaderboard               Leaderboard[]
+}
+
+model ContestToChallengeMapping {
+  id          String       @id @default(uuid())
+  contestId   String
+  challengeId String
+  index       Int
+  contest     Contest      @relation(fields: [contestId], references: [id])
+  challenge   Challenge    @relation(fields: [challengeId], references: [id])
+  Submissions Submission[]
+
+  @@unique([contestId, challengeId])
+}
+
+model Challenge {
+  id                        String                      @id @default(uuid())
+  title                     String
+  notionDocId               String
+  contestId                 String
+  maxPoints                 Int
+  contestToChallengeMapping ContestToChallengeMapping[]
+}
+
+model Submission {
+  id                          String                    @id @default(uuid())
+  submission                  String
+  userId                      String
+  user                        User                      @relation(fields: [userId], references: [id])
+  contestToChallengeMappingId String
+  contestToChallengeMapping   ContestToChallengeMapping @relation(fields: [contestToChallengeMappingId], references: [id])
+  points                      Int
+  createdAt                   DateTime                  @default(now())
+}
+
+model Leaderboard {
+  id        String  @id @default(uuid())
+  contestId String
+  userId    String
+  rank      Int
+  contest   Contest @relation(fields: [contestId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([contestId, rank])
+}
