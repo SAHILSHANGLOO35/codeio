@@ -17,6 +17,10 @@ app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 app.use("/contest", contestRouter);
 
+app.get("/health", (req, res) => {
+  res.json({ status: "OK Status", timestamp: new Date().toISOString() });
+});
+
 app.listen(process.env.PORT || 4000, () => {
   console.log(`SERVER STARTED ON PORT ${process.env.PORT}`);
 });

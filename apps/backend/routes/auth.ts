@@ -1,5 +1,4 @@
 import { Router } from "express";
-// import passport from "../middlewares/googleAuth";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 
@@ -28,8 +27,15 @@ authRouter.get(
       httpOnly: true,
       secure: false, // true in prod
       sameSite: "strict",
+      maxAge: 24 * 7 * 60 * 60 * 1000, // 7 days
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 );
+
+// Logout
+authRouter.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "Logged out successfully" });
+});
